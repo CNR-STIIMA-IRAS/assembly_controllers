@@ -22,7 +22,7 @@
   <build_export_depend>rosdyn_core</build_export_depend>
   <exec_depend>controller_interface</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>itia_basic_hardware_interface</exec_depend>
+  <exec_depend>cnr_hardware_interface</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rosdyn_core</exec_depend>
 

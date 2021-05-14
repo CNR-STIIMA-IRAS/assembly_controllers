@@ -8,7 +8,7 @@
 /**
  * @brief PLUGINLIB_EXPORT_CLASS
  */
-PLUGINLIB_EXPORT_CLASS(itia::control::SimpleTouchController, controller_interface::ControllerBase);
+PLUGINLIB_EXPORT_CLASS(cnr::control::SimpleTouchController, controller_interface::ControllerBase);
 
 
 namespace std
@@ -53,13 +53,13 @@ inline std::string to_string( const bool& val )
   }
 
 
-namespace itia
+namespace cnr
 {
 namespace control
 {
 
 
-bool SimpleTouchController::init(hardware_interface::ForceTorqueInterface *hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh)
+bool SimpleTouchController::init(hardware_interface::ForceTorqueSensorInterface *hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh)
 {
   m_hw            = hw;
   m_root_nh       = root_nh;
@@ -180,6 +180,8 @@ void SimpleTouchController::update(const ros::Time& time, const ros::Duration& p
   m_wrench_s.block(0,0,3,1) = Eigen::Vector3d( m_ft_h.getForce( ) );
   m_wrench_s.block(3,0,3,1) = Eigen::Vector3d( m_ft_h.getTorque( ) );
 
+  ROS_FATAL_STREAM("wrench: "<<m_wrench_s.transpose());
+
 
   // ROS_DEBUG_STREAM_THROTTLE(2, "[ " << m_controller_nh.getNamespace() <<  "] Measured Wrench {" << m_sensor_frame<<"}: " << m_wrench_s.transpose() );
   m_controller_nh_callback_queue.callAvailable();
@@ -204,7 +206,6 @@ void SimpleTouchController::update(const ros::Time& time, const ros::Duration& p
   tw.header.stamp    = ros::Time::now();
 
   m_target_twist_pub.publish(tw);
-
 
 }
 
