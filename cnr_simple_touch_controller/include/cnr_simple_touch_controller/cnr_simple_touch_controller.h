@@ -84,7 +84,7 @@ protected:
     bool m_stop_thread = false;
     void actionGoalCallback   (actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle gh);
     void actionCancelCallback (actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle gh);
-    void actionThreadTunction ( );
+    void actionThreadFunction ( );
 
 };
 }

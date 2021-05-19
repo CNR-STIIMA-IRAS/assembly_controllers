@@ -180,9 +180,6 @@ void SimpleTouchController::update(const ros::Time& time, const ros::Duration& p
   m_wrench_s.block(0,0,3,1) = Eigen::Vector3d( m_ft_h.getForce( ) );
   m_wrench_s.block(3,0,3,1) = Eigen::Vector3d( m_ft_h.getTorque( ) );
 
-//  ROS_FATAL_STREAM("wrench: "<<m_wrench_s.transpose());
-
-
   // ROS_DEBUG_STREAM_THROTTLE(2, "[ " << m_controller_nh.getNamespace() <<  "] Measured Wrench {" << m_sensor_frame<<"}: " << m_wrench_s.transpose() );
   m_controller_nh_callback_queue.callAvailable();
 
@@ -191,7 +188,7 @@ void SimpleTouchController::update(const ros::Time& time, const ros::Duration& p
     ROS_DEBUG_STREAM_THROTTLE(2, "[ " << m_controller_nh.getNamespace() <<  "] Touched! Set to zero the output twist" );
     m_target_twist.setZero();
   }
-  
+
   ROS_DEBUG_STREAM_THROTTLE(2, "[ " << m_controller_nh.getNamespace() <<  "] Output twist: " << m_target_twist.transpose() );
 
   geometry_msgs::TwistStamped tw;
@@ -272,7 +269,7 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
 
     m_touched = false;
     m_stop_thread  = false;
-    m_as_thread = std::thread(&SimpleTouchController::actionThreadTunction,this);
+    m_as_thread = std::thread(&SimpleTouchController::actionThreadFunction,this);
   }
   catch( std::exception& e )
   {
@@ -308,7 +305,7 @@ void SimpleTouchController::actionCancelCallback(actionlib::ActionServer< simple
   ROS_DEBUG("[ %s ] Action Succesfully Cancelled",  m_controller_nh.getNamespace().c_str());
 }
 
-void SimpleTouchController::actionThreadTunction()
+void SimpleTouchController::actionThreadFunction()
 {
   ROS_DEBUG("[ %s ] START ACTION GOAL LOOP",  m_controller_nh.getNamespace().c_str());
   ros::WallRate lp(100);
