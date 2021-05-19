@@ -180,7 +180,7 @@ void SimpleTouchController::update(const ros::Time& time, const ros::Duration& p
   m_wrench_s.block(0,0,3,1) = Eigen::Vector3d( m_ft_h.getForce( ) );
   m_wrench_s.block(3,0,3,1) = Eigen::Vector3d( m_ft_h.getTorque( ) );
 
-  ROS_FATAL_STREAM("wrench: "<<m_wrench_s.transpose());
+//  ROS_FATAL_STREAM("wrench: "<<m_wrench_s.transpose());
 
 
   // ROS_DEBUG_STREAM_THROTTLE(2, "[ " << m_controller_nh.getNamespace() <<  "] Measured Wrench {" << m_sensor_frame<<"}: " << m_wrench_s.transpose() );
