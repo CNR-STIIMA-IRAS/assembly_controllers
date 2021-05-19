@@ -1,5 +1,4 @@
-#ifndef simple_touch_controller_20190325
-#define simple_touch_controller_20190325
+#pragma once
 
 #include <ros/ros.h>
 #include <controller_interface/controller.h>
@@ -22,10 +21,9 @@
 #include <tf/transform_datatypes.h>
 #include <simple_touch_controller_msgs/simpleTouchAction.h>
 #include <tf/transform_listener.h>
-
-//#include <cnr_hardware_interface/force_torque_state_interface.h>
-//#include <cnr_hardware_interface/force_torque_command_interface.h>
 #include <hardware_interface/force_torque_sensor_interface.h>
+#include <cnr_controller_interface/cnr_controller_interface.h>
+
 
 #if ROS_VERSION_MINIMUM(1, 14, 1)
 #include <memory>
@@ -38,26 +36,25 @@ namespace cnr
 namespace control
 {
 
-class SimpleTouchController: public controller_interface::Controller<hardware_interface::ForceTorqueSensorInterface>
+class SimpleTouchController: public cnr::control::Controller<hardware_interface::ForceTorqueSensorInterface>
 {
 
 public:
-
-  bool init     ( hardware_interface::ForceTorqueSensorInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh );
-  void update   ( const ros::Time& time, const ros::Duration& period );
-  void starting ( const ros::Time& time );
-  void stopping ( const ros::Time& time );
+//    bool init     ( hardware_interface::ForceTorqueSensorInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh );
+    bool doInit();
+    bool doUpdate  (const ros::Time& time, const ros::Duration& period);
+    bool doStarting(const ros::Time& time);
+    bool doStopping(const ros::Time& time);
 
 protected:
-    hardware_interface::ForceTorqueSensorInterface*           m_hw;
-    hardware_interface::ForceTorqueSensorHandle               m_ft_h;
+    hardware_interface::ForceTorqueSensorHandle         m_ft_h;
     ros::NodeHandle                                     m_root_nh;
     ros::NodeHandle                                     m_controller_nh;
     ros::CallbackQueue                                  m_controller_nh_callback_queue;
     std::string                                         m_ft_resource_name;
 
     std::shared_ptr< tf::TransformListener > m_listener;        
-    ros::Publisher m_target_twist_pub;
+    size_t m_target_twist_pub;
     
     std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>>             m_as;
     std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle> m_gh;
@@ -93,7 +90,3 @@ protected:
 
 
 
-
-
-
-#endif
