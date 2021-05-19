@@ -91,6 +91,7 @@ inline bool CartesianVelocityController::doUpdate(const ros::Time& /*time*/, con
   {
     CNR_FATAL(this->logger(),"rank: "<<pinv_J.rank()<<"\nJacobian\n"<<J_b);
   }
+  CNR_TRACE_THROTTLE(this->logger(),0.5,"Compute IK");
 
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(J_b, Eigen::ComputeThinU | Eigen::ComputeThinV);
   CNR_WARN_COND_THROTTLE(this->logger(),
@@ -99,7 +100,7 @@ inline bool CartesianVelocityController::doUpdate(const ros::Time& /*time*/, con
 
   vel_sp_ = svd.solve(twist_in_b_);
   pos_sp_ = this->getCommandPosition() + vel_sp_ * period.toSec();
-
+  CNR_TRACE_THROTTLE(this->logger(),0.5,"Compute position: " << pos_sp_.transpose());
   if(rosdyn::saturatePosition(this->chainNonConst(), pos_sp_, &report))
   {
     CNR_WARN_THROTTLE(this->logger(), 2.0, "\n" << report.str() );
