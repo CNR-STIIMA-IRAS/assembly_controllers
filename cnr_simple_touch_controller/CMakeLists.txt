@@ -6,9 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(catkin REQUIRED COMPONENTS
-  controller_interface
   geometry_msgs
   cnr_hardware_interface
+  cnr_controller_interface
+  controller_interface
   roscpp
   rosdyn_core
   subscription_notifier
@@ -19,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES cnr_simple_touch_controller
-  CATKIN_DEPENDS controller_interface geometry_msgs cnr_hardware_interface roscpp rosdyn_core subscription_notifier actionlib simple_touch_controller_msgs tf_conversions
+  CATKIN_DEPENDS controller_interface cnr_controller_interface geometry_msgs cnr_hardware_interface roscpp rosdyn_core subscription_notifier actionlib simple_touch_controller_msgs tf_conversions
   DEPENDS
 )
 
