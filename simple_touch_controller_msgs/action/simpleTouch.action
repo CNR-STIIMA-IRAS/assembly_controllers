@@ -1,11 +1,24 @@
 float64[] goal_twist
-float64[] target_wrench
-float64[] wrench_toll
-float64[] wrench_deadband
-string    target_wrench_frame
+float64   target_force
 string    goal_twist_frame
+bool      relative_target
+
+# if release_condition==POSITION, twist direction is inverted and it is applying until norm(force)<release
+# if release_condition==FORCE,    twist direction is inverted and it is applying until the robot move backs force release/norm(twist.linear)
+# if release_condition==NONE,     goal stop immediately after norm(force)>target_force
+float64   release
+int8      release_condition
+int8      POSITION = 1
+int8      FORCE    = 2
+int8      NONE     = 0
 ---
 int32  error_code
+int32  GOAL_EXCEPTION=-1
 string error_string
+geometry_msgs/PoseStamped contact_pose
 ---
-float64[] jointValues
+int8 state
+int8 SEEK_CONTACT = 0
+int8 RELEASING    = 1
+int8 FAIL         = 2
+int8 DONE         = 2

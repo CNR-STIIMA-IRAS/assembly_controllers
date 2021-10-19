@@ -47,38 +47,42 @@ public:
     bool doStopping(const ros::Time& time);
 
 protected:
-    hardware_interface::ForceTorqueSensorHandle         m_ft_h;
-    ros::NodeHandle                                     m_root_nh;
-    ros::NodeHandle                                     m_controller_nh;
-    ros::CallbackQueue                                  m_controller_nh_callback_queue;
-    std::string                                         m_ft_resource_name;
+    hardware_interface::ForceTorqueSensorHandle m_ft_h;
+    ros::NodeHandle                             m_root_nh;
+    ros::NodeHandle                             m_controller_nh;
+    ros::CallbackQueue                          m_controller_nh_callback_queue;
+    std::string                                 m_ft_resource_name;
 
-    std::shared_ptr< tf::TransformListener > m_listener;        
-    size_t m_target_twist_pub;
-    
+
     std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>>             m_as;
     std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle> m_gh;
-    bool            m_preempted;
 
-    bool            m_touched    = false;
-    std::string     m_base_frame;
-    std::string     m_tool_frame;
-    std::string     m_sensor_frame;
-    std::string     m_goal_wrench_frame = "tool";
+    size_t m_target_twist_pub;
+    bool m_preempted   = false;
+    bool m_touched     = false;
+    bool m_stop_thread = false;
+
+    int m_automa_state;
+    int m_release_condition;
+
+    double m_release_time;
+    double m_release_force;
+    double m_goal_wrench_norm;
+
+    ros::Time m_contact_time;
+
+
     std::string     m_goal_twist_frame  = "tool";
 
-    double          m_goal_wrench_norm     ;
-    double          m_goal_wrench_norm_toll;
-    Eigen::Vector6d m_wrench_s             ;
-    Eigen::Vector6d m_target_twist         ;
-    Eigen::Vector6d m_goal_wrench_g        ;
-    Eigen::Vector6d m_goal_wrench_toll     ;
-    Eigen::Vector6d m_goal_wrench_deadband ;
-    Eigen::Vector6d m_goal_twist           ;
-    double          m_leaving_time=0.0;
+    Eigen::Vector6d m_wrench        ;
+    Eigen::Vector6d m_initial_wrench;
+    Eigen::Vector6d m_target_twist  ;
+    Eigen::Vector6d m_goal_twist    ;
+
+    geometry_msgs::PoseStamped m_contact_pose;
 
     std::thread m_as_thread;
-    bool m_stop_thread = false;
+
     void actionGoalCallback   (actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle gh);
     void actionCancelCallback (actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle gh);
     void actionThreadFunction ( );
