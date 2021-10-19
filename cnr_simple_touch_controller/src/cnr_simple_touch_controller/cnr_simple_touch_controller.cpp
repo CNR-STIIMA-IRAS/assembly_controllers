@@ -94,7 +94,7 @@ bool SimpleTouchController::doInit()
 }
 
 
-bool SimpleTouchController::doStarting(const ros::Time& time)
+bool SimpleTouchController::doStarting(const ros::Time& /*time*/)
 {
   CNR_TRACE_START(this->logger(),"Starting controller.");
   CNR_INFO(this->logger(),"[ "<<this->getControllerNamespace()<<" ] Starting controller" );
@@ -121,7 +121,7 @@ bool SimpleTouchController::doStarting(const ros::Time& time)
 }
 
 
-bool SimpleTouchController::doStopping(const ros::Time& time)
+bool SimpleTouchController::doStopping(const ros::Time& /*time*/)
 {
   CNR_INFO(this->logger(),"[ "<<this->getControllerNamespace()<<" ] Stopping Controller");
   m_target_twist.setZero();
@@ -162,7 +162,7 @@ bool SimpleTouchController::doStopping(const ros::Time& time)
 
 
 
-bool SimpleTouchController::doUpdate(const ros::Time& time, const ros::Duration& period)
+bool SimpleTouchController::doUpdate(const ros::Time& /*time*/, const ros::Duration& /*period*/)
 {
   
   m_wrench_s.block(0,0,3,1) = Eigen::Vector3d( m_ft_h.getForce( ) );
@@ -276,7 +276,7 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
 
 void SimpleTouchController::actionCancelCallback(actionlib::ActionServer< simple_touch_controller_msgs::simpleTouchAction >::GoalHandle gh)
 {
-  ROS_DEBUG("[ %s ] Triggered the Cancel of the Action",  this->getControllerNamespace());
+  ROS_DEBUG("[ %s ] Triggered the Cancel of the Action",  this->getControllerNamespace().c_str());
   if (m_gh)
   {
     m_gh->setCanceled();
@@ -290,14 +290,14 @@ void SimpleTouchController::actionCancelCallback(actionlib::ActionServer< simple
   }
   else
   {
-    ROS_WARN("[ %s ] Triggered the Cancel of the Action but none Goal is active.",  this->getControllerNamespace());
+    ROS_WARN("[ %s ] Triggered the Cancel of the Action but none Goal is active.",  this->getControllerNamespace().c_str());
   }
-  ROS_DEBUG("[ %s ] Action Succesfully Cancelled",  this->getControllerNamespace());
+  ROS_DEBUG("[ %s ] Action Succesfully Cancelled",  this->getControllerNamespace().c_str());
 }
 
 void SimpleTouchController::actionThreadFunction()
 {
-  ROS_DEBUG("[ %s ] START ACTION GOAL LOOP",  this->getControllerNamespace());
+  ROS_DEBUG("[ %s ] START ACTION GOAL LOOP",  this->getControllerNamespace().c_str());
   ros::WallRate lp(100);
 
   int automa_state=0; //
@@ -308,13 +308,13 @@ void SimpleTouchController::actionThreadFunction()
     lp.sleep();
     if (!m_gh)
     {
-      ROS_ERROR("[ %s ] Goal handle is not initialized",  this->getControllerNamespace());
+      ROS_ERROR("[ %s ] Goal handle is not initialized",  this->getControllerNamespace().c_str());
       break;
     }
 
     if( m_stop_thread )
     {
-      ROS_ERROR("[ %s ] Triggered an external stop. Break the action loop.",  this->getControllerNamespace());
+      ROS_ERROR("[ %s ] Triggered an external stop. Break the action loop.",  this->getControllerNamespace().c_str());
       break;
     }
 
