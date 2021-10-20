@@ -313,7 +313,7 @@ void SimpleTouchController::actionThreadFunction()
 
     double current_force=wrench.head(3).norm();
 
-
+    ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
     // transitions
     if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::SEEK_CONTACT)
     {
@@ -323,20 +323,25 @@ void SimpleTouchController::actionThreadFunction()
         if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::NONE)
           m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
         else
+        {
           m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::RELEASING;
+          ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
+        }
       }
     }
     else if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::RELEASING)
     {
       double current_time=(ros::Time::now()-m_contact_time).toSec();
-      if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::POSITION)
+      if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::FORCE)
       {
+        ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
         if (current_force<=m_release_force)
         {
           m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
+          ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
         }
       }
-      else if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::FORCE)
+      else if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::POSITION)
       {
         if (current_time>=m_release_time)
         {
