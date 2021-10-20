@@ -304,17 +304,17 @@ void SimpleTouchController::actionThreadFunction()
       break;
     }
 
-    if( m_stop_thread )
-    {
-      ROS_ERROR("[ %s ] Triggered an external stop. Break the action loop.",  this->getControllerNamespace().c_str());
-      break;
-    }
 
     Eigen::Vector6d wrench = m_wrench-m_initial_wrench;
 
     double current_force=wrench.head(3).norm();
 
     // transitions
+    if (m_stop_thread)
+    {
+      ROS_ERROR("[ %s ] Triggered an external stop. Break the action loop.",  this->getControllerNamespace().c_str());
+      m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::FAIL;
+    }
     if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::SEEK_CONTACT)
     {
       if (current_force>m_goal_wrench_norm)
