@@ -235,6 +235,7 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
     {
       m_release_time     = 0.0;
       m_release_force    = 0.0;
+      m_release_condition=simple_touch_controller_msgs::simpleTouchGoal::NONE;
     }
 
 
@@ -313,7 +314,6 @@ void SimpleTouchController::actionThreadFunction()
 
     double current_force=wrench.head(3).norm();
 
-
     // transitions
     if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::SEEK_CONTACT)
     {
@@ -329,14 +329,14 @@ void SimpleTouchController::actionThreadFunction()
     else if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::RELEASING)
     {
       double current_time=(ros::Time::now()-m_contact_time).toSec();
-      if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::POSITION)
+      if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::FORCE)
       {
         if (current_force<=m_release_force)
         {
           m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
         }
       }
-      else if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::FORCE)
+      else if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::POSITION)
       {
         if (current_time>=m_release_time)
         {
@@ -346,6 +346,7 @@ void SimpleTouchController::actionThreadFunction()
     }
 
     simple_touch_controller_msgs::simpleTouchFeedback fb;
+    fb.state=m_automa_state;
     m_gh->publishFeedback(fb);
 
 
