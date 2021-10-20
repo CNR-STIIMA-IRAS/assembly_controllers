@@ -19,7 +19,7 @@
 #include <tf_conversions/tf_eigen.h>
 #include <tf/tf.h>
 #include <tf/transform_datatypes.h>
-#include <simple_touch_controller_msgs/simpleTouchAction.h>
+#include <simple_touch_controller_msgs/SimpleTouchAction.h>
 #include <tf/transform_listener.h>
 #include <hardware_interface/force_torque_sensor_interface.h>
 #include <cnr_controller_interface/cnr_controller_interface.h>
@@ -54,8 +54,8 @@ protected:
     std::string                                 m_ft_resource_name;
 
 
-    std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>>             m_as;
-    std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle> m_gh;
+    std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>>             m_as;
+    std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle> m_gh;
 
     size_t m_target_twist_pub;
     bool m_preempted   = false;
@@ -83,8 +83,8 @@ protected:
 
     std::thread m_as_thread;
 
-    void actionGoalCallback   (actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle gh);
-    void actionCancelCallback (actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle gh);
+    void actionGoalCallback   (actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle gh);
+    void actionCancelCallback (actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle gh);
     void actionThreadFunction ( );
 
 };

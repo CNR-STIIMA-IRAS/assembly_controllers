@@ -98,7 +98,7 @@ bool SimpleTouchController::doStarting(const ros::Time& /*time*/)
 
   m_controller_nh_callback_queue.callAvailable();
 
-  m_as.reset(new actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>(this->getControllerNh(), "simple_touch",
+  m_as.reset(new actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>(this->getControllerNh(), "simple_touch",
                                                                       boost::bind(&SimpleTouchController::actionGoalCallback,    this,  _1),
                                                                       boost::bind(&SimpleTouchController::actionCancelCallback,  this,  _1),
                                                                       false));
@@ -186,15 +186,15 @@ bool SimpleTouchController::doUpdate(const ros::Time& /*time*/, const ros::Durat
 
 }
 
-void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_touch_controller_msgs::simpleTouchAction>::GoalHandle gh)
+void SimpleTouchController::actionGoalCallback(actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle gh)
 {
   try
   {
     auto goal = gh.getGoal();
 
-    std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle> current_gh;
+    std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle> current_gh;
 
-    current_gh.reset(new actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>::GoalHandle(gh));
+    current_gh.reset(new actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle(gh));
     m_gh = current_gh;
 
     CNR_INFO(this->logger(),"[ "<<this->getControllerNamespace()<<" ] New Goal Received, action start!");
@@ -221,21 +221,21 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
     }
 
     m_release_condition = goal->release_condition;
-    if (m_release_condition==simple_touch_controller_msgs::simpleTouchGoal::POSITION)
+    if (m_release_condition==simple_touch_controller_msgs::SimpleTouchGoal::POSITION)
     {
       m_release_time     = goal->release/m_goal_twist.head(3).norm();
       m_release_force    = 0.0;
     }
-    else if (m_release_condition==simple_touch_controller_msgs::simpleTouchGoal::FORCE)
+    else if (m_release_condition==simple_touch_controller_msgs::SimpleTouchGoal::FORCE)
     {
       m_release_time     = 0.0;
       m_release_force    = goal->release;
     }
-    else// if (m_release_condition==simple_touch_controller_msgs::simpleTouchGoal::NONE)
+    else// if (m_release_condition==simple_touch_controller_msgs::SimpleTouchGoal::NONE)
     {
       m_release_time     = 0.0;
       m_release_force    = 0.0;
-      m_release_condition=simple_touch_controller_msgs::simpleTouchGoal::NONE;
+      m_release_condition=simple_touch_controller_msgs::SimpleTouchGoal::NONE;
     }
 
 
@@ -243,13 +243,13 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
 
     m_touched      = false;
     m_stop_thread  = false;
-    m_automa_state = simple_touch_controller_msgs::simpleTouchFeedback::SEEK_CONTACT;
+    m_automa_state = simple_touch_controller_msgs::SimpleTouchFeedback::SEEK_CONTACT;
     m_as_thread    = std::thread(&SimpleTouchController::actionThreadFunction,this);
   }
   catch( std::exception& e )
   {
     ROS_ERROR_STREAM("Exception. what: " << e.what() );
-    simple_touch_controller_msgs::simpleTouchResult result;
+    simple_touch_controller_msgs::SimpleTouchResult result;
     result.error_code   = -1;
     result.error_string = std::string("exception: ")+e.what();
     m_target_twist.setZero( );
@@ -258,7 +258,7 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
   catch( ... )
   {
     ROS_ERROR_STREAM("Generalized Exception.");
-    simple_touch_controller_msgs::simpleTouchResult result;
+    simple_touch_controller_msgs::SimpleTouchResult result;
     result.error_code   = -1;
     result.error_string = "goal exception";
     m_target_twist.setZero( );
@@ -267,7 +267,7 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
 
 }
 
-void SimpleTouchController::actionCancelCallback(actionlib::ActionServer< simple_touch_controller_msgs::simpleTouchAction >::GoalHandle /*gh*/)
+void SimpleTouchController::actionCancelCallback(actionlib::ActionServer< simple_touch_controller_msgs::SimpleTouchAction >::GoalHandle /*gh*/)
 {
   ROS_DEBUG("[ %s ] Triggered the Cancel of the Action",  this->getControllerNamespace().c_str());
   if (m_gh)
@@ -315,58 +315,58 @@ void SimpleTouchController::actionThreadFunction()
     double current_force=wrench.head(3).norm();
 
     // transitions
-    if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::SEEK_CONTACT)
+    if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::SEEK_CONTACT)
     {
       if (current_force>m_goal_wrench_norm)
       {
         m_contact_time = ros::Time::now();
-        if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::NONE)
-          m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
+        if (m_release_condition == simple_touch_controller_msgs::SimpleTouchGoal::NONE)
+          m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::DONE;
         else
         {
-          m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::RELEASING;
+          m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::RELEASING;
           ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
         }
       }
     }
-    else if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::RELEASING)
+    else if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::RELEASING)
     {
       double current_time=(ros::Time::now()-m_contact_time).toSec();
-      if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::FORCE)
+      if (m_release_condition == simple_touch_controller_msgs::SimpleTouchGoal::FORCE)
       {
         ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
         if (current_force<=m_release_force)
         {
-          m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
+          m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::DONE;
           ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
         }
       }
-      else if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::POSITION)
+      else if (m_release_condition == simple_touch_controller_msgs::SimpleTouchGoal::POSITION)
       {
         if (current_time>=m_release_time)
         {
-          m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
+          m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::DONE;
         }
       }
     }
 
-    simple_touch_controller_msgs::simpleTouchFeedback fb;
+    simple_touch_controller_msgs::SimpleTouchFeedback fb;
     fb.state=m_automa_state;
     m_gh->publishFeedback(fb);
 
 
     fb.state=m_automa_state;
-    simple_touch_controller_msgs::simpleTouchResult result;
+    simple_touch_controller_msgs::SimpleTouchResult result;
     // states
-    if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::SEEK_CONTACT)
+    if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::SEEK_CONTACT)
     {
       m_target_twist=m_goal_twist;
     }
-    else if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::RELEASING)
+    else if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::RELEASING)
     {
       m_target_twist=-m_goal_twist;
     }
-    else if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::DONE)
+    else if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::DONE)
     {
       result.error_code   = 0;
       result.error_string = "finished";
@@ -374,7 +374,7 @@ void SimpleTouchController::actionThreadFunction()
       m_target_twist.setZero();
       break;
     }
-    else if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::FAIL)
+    else if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::FAIL)
     {
       result.error_code   = -1;
       result.error_string = ".............";
