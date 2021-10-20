@@ -99,8 +99,8 @@ bool SimpleTouchController::doStarting(const ros::Time& /*time*/)
   m_controller_nh_callback_queue.callAvailable();
 
   m_as.reset(new actionlib::ActionServer<simple_touch_controller_msgs::simpleTouchAction>(this->getControllerNh(), "simple_touch",
-                                                                      boost::bind(&SimpleTouchController::actionGoalCallback,    this,  _1), 
-                                                                      boost::bind(&SimpleTouchController::actionCancelCallback,  this,  _1), 
+                                                                      boost::bind(&SimpleTouchController::actionGoalCallback,    this,  _1),
+                                                                      boost::bind(&SimpleTouchController::actionCancelCallback,  this,  _1),
                                                                       false));
   m_as->start();
 
@@ -143,7 +143,7 @@ bool SimpleTouchController::doStopping(const ros::Time& /*time*/)
     m_as_thread.join();
   }
   m_gh.reset();
-  
+
   CNR_INFO(this->logger(),"[ "<<this->getControllerNamespace()<<" ] Controller Succesfully Stopped");
 
   CNR_RETURN_TRUE(this->logger());
@@ -153,7 +153,7 @@ bool SimpleTouchController::doStopping(const ros::Time& /*time*/)
 
 bool SimpleTouchController::doUpdate(const ros::Time& /*time*/, const ros::Duration& /*period*/)
 {
-  
+
   m_wrench.block(0,0,3,1) = Eigen::Vector3d( m_ft_h.getForce( ) );
   m_wrench.block(3,0,3,1) = Eigen::Vector3d( m_ft_h.getTorque( ) );
 
@@ -264,7 +264,7 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer< simple_t
     m_target_twist.setZero( );
     m_gh->setAborted(result);
   }
-  
+
 }
 
 void SimpleTouchController::actionCancelCallback(actionlib::ActionServer< simple_touch_controller_msgs::simpleTouchAction >::GoalHandle /*gh*/)
@@ -323,7 +323,10 @@ void SimpleTouchController::actionThreadFunction()
         if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::NONE)
           m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
         else
+        {
           m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::RELEASING;
+          ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
+        }
       }
     }
     else if (m_automa_state==simple_touch_controller_msgs::simpleTouchFeedback::RELEASING)
@@ -331,9 +334,11 @@ void SimpleTouchController::actionThreadFunction()
       double current_time=(ros::Time::now()-m_contact_time).toSec();
       if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::FORCE)
       {
+        ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
         if (current_force<=m_release_force)
         {
           m_automa_state=simple_touch_controller_msgs::simpleTouchFeedback::DONE;
+          ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
         }
       }
       else if (m_release_condition == simple_touch_controller_msgs::simpleTouchGoal::POSITION)
