@@ -228,7 +228,7 @@ void SimpleTouchController::actionGoalCallback(actionlib::ActionServer<simple_to
     }
     else if (m_release_condition==simple_touch_controller_msgs::SimpleTouchGoal::FORCE)
     {
-      m_release_time     = 0.0;
+      m_release_time     = 5.0;  // FAIL AFTER 5 SECONDS
       m_release_force    = goal->release;
     }
     else// if (m_release_condition==simple_touch_controller_msgs::SimpleTouchGoal::NONE)
@@ -339,6 +339,10 @@ void SimpleTouchController::actionThreadFunction()
         {
           m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::DONE;
           ROS_FATAL_THROTTLE(0.1,"force =%f, target = %f, release =%f",current_force,m_goal_wrench_norm,m_release_force);
+        }
+        if (current_time>=m_release_time)
+        {
+          m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::FAIL;
         }
       }
       else if (m_release_condition == simple_touch_controller_msgs::SimpleTouchGoal::POSITION)
