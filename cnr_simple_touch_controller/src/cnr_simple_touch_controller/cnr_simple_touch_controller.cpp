@@ -78,6 +78,7 @@ bool SimpleTouchController::doInit()
 
 
   m_target_twist_pub = this->template add_publisher<geometry_msgs::TwistStamped>(output_twist_name,1000);
+  this->template add_subscriber<std_msgs::Bool>("/cartesian_velocity/singolarity",1,boost::bind(&SimpleTouchController::singolarityCheck,this,_1), false);
 
   CNR_RETURN_TRUE(this->logger());
 }
@@ -178,7 +179,6 @@ bool SimpleTouchController::doUpdate(const ros::Time& /*time*/, const ros::Durat
   tw.twist.angular.z = m_target_twist(5,0);
   tw.header.frame_id = m_goal_twist_frame;
   tw.header.stamp    = ros::Time::now();
-
 
   this->publish(m_target_twist_pub, tw );
 
@@ -317,6 +317,11 @@ void SimpleTouchController::actionThreadFunction()
     }
     if (m_automa_state==simple_touch_controller_msgs::SimpleTouchFeedback::SEEK_CONTACT)
     {
+      if (m_singolarity)
+      {
+        m_automa_state=simple_touch_controller_msgs::SimpleTouchFeedback::FAIL;
+        ROS_FATAL("Singolarity");
+      }
       if (current_force>m_goal_wrench_norm)
       {
         m_contact_time = ros::Time::now();
@@ -388,6 +393,11 @@ void SimpleTouchController::actionThreadFunction()
     }
   }
   m_gh.reset();
+}
+
+void SimpleTouchController::singolarityCheck(const std_msgs::Bool::ConstPtr &msg)
+{
+    m_singolarity = msg->data;
 }
 
 

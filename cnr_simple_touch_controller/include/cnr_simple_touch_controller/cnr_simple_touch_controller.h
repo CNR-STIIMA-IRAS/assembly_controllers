@@ -23,7 +23,7 @@
 #include <tf/transform_listener.h>
 #include <hardware_interface/force_torque_sensor_interface.h>
 #include <cnr_controller_interface/cnr_controller_interface.h>
-
+#include <std_msgs/Bool.h>
 
 #if ROS_VERSION_MINIMUM(1, 14, 1)
 #include <memory>
@@ -58,9 +58,11 @@ protected:
     std::shared_ptr<actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle> m_gh;
 
     size_t m_target_twist_pub;
+
     bool m_preempted   = false;
     bool m_touched     = false;
     bool m_stop_thread = false;
+    bool m_singolarity = false;
 
     int m_automa_state;
     int m_release_condition;
@@ -86,6 +88,7 @@ protected:
     void actionGoalCallback   (actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle gh);
     void actionCancelCallback (actionlib::ActionServer<simple_touch_controller_msgs::SimpleTouchAction>::GoalHandle gh);
     void actionThreadFunction ( );
+    void singolarityCheck(const std_msgs::Bool::ConstPtr& msg);
 
 };
 }
